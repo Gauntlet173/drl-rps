@@ -1,0 +1,30 @@
+package smucclaw.rps
+
+import smucclaw.rps.App.Game;
+import smucclaw.rps.App.Player;
+import smucclaw.rps.App.Sign;
+
+rule "Check for Games With Winners"
+    salience 1
+    when
+        $GAME : Game( $WINNER : winner  )
+        $PLAYER1 : Player( this == $WINNER ) from $GAME.players
+        $PLAYER2 : Player( this != $PLAYER1 ) from $GAME.players
+    then
+        System.out.println("The winner of the game between " + $WINNER.getName() + " and " + $PLAYER2.getName() + " is " + $WINNER.getName() + ".\n" +
+           $WINNER.getName() + " threw " + $WINNER.getPlay().getName() + " and " + $PLAYER2.getName() + " threw " + $PLAYER2.getPlay().getName() + ".\n" +
+           $WINNER.getPlay().getName() + " beats " + $WINNER.getPlay().getBeats().getName() + ".\n");
+end
+
+rule "Determine Winner"
+    salience 10
+    enabled true
+    when
+        $GAME: Game( )
+        $PLAYER1: Player( ) from $GAME.players
+        $PLAYER2: Player( this != $PLAYER1 ) from $GAME.players
+        $PLAY1 : Sign( ) from $PLAYER1.play
+        $PLAY2 : Sign( beats == $PLAY1 ) from $PLAYER2.play
+    then
+        $GAME.setWinner($PLAYER2);
+end
